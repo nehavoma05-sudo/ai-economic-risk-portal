@@ -1,0 +1,36 @@
+import mysql.connector
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+conn = mysql.connector.connect(
+    host=os.getenv("MYSQLHOST"),
+    port=int(os.getenv("MYSQLPORT")),
+    user=os.getenv("MYSQLUSER"),
+    password=os.getenv("MYSQLPASSWORD"),
+    database=os.getenv("MYSQLDATABASE")
+)
+
+cursor = conn.cursor()
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS fii_dii_data (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    trade_date DATE UNIQUE,
+    fii_buy_value DOUBLE,
+    fii_sell_value DOUBLE,
+    fii_net_value DOUBLE,
+    dii_buy_value DOUBLE,
+    dii_sell_value DOUBLE,
+    dii_net_value DOUBLE,
+    fii_dii_flow DOUBLE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+""")
+
+conn.commit()
+
+print("Table created successfully!")
+
+cursor.close()
+conn.close()
