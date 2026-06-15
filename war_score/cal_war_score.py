@@ -1,13 +1,12 @@
 import datetime
 import os
+from datetime import timedelta
 
+import requests
+from dotenv import load_dotenv
 def fetch_middle_east_news():
     # Import dependencies inside the function so this feature is self-contained.
-    import os
-    from datetime import timedelta
-
-    import requests
-    from dotenv import load_dotenv
+    
 
     # Load environment variables from .env and read the NewsAPI key.
     load_dotenv()
