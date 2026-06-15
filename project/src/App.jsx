@@ -81,7 +81,7 @@ function App() {
 
 async function fetchLiveRiskNews() {
   try {
-    const res = await fetch(`${API_BASE_URL}/live_dashboard`);
+    const res = await fetch(`${API_BASE_URL}/live-dashboard`);
     const data = await res.json();
     setLiveRiskNews(data);
   } catch (err) {
