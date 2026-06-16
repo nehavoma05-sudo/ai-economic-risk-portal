@@ -1,11 +1,11 @@
 import json
-import os
 import pickle
+from pathlib import Path
 
 import pandas as pd
 
-
-MODEL_DIR = r"C:\Users\HP\economic-ai\gas_predicition\models"
+BASE_DIR = Path(__file__).resolve().parent
+MODEL_DIR = BASE_DIR / "models"
 
 MODEL_FILES = {
     "petrol_rise": "petrol_model.pkl",
@@ -19,7 +19,7 @@ FEATURE_COLUMNS_FILE = "feature_columns.pkl"
 
 
 def load_pickle_file(file_path):
-    if not os.path.exists(file_path):
+    if not file_path.exists():
         raise FileNotFoundError(f"Required file not found: {file_path}")
 
     with open(file_path, "rb") as file:
@@ -27,27 +27,24 @@ def load_pickle_file(file_path):
 
 
 def load_models():
-    feature_columns_path = os.path.join(MODEL_DIR, FEATURE_COLUMNS_FILE)
+    feature_columns_path = MODEL_DIR / FEATURE_COLUMNS_FILE
     feature_columns = load_pickle_file(feature_columns_path)
 
     models = {}
     for target_name, model_filename in MODEL_FILES.items():
-        model_path = os.path.join(MODEL_DIR, model_filename)
+        model_path = MODEL_DIR / model_filename
         models[target_name] = load_pickle_file(model_path)
 
     return models, feature_columns
 
 
 def parse_json_input(json_input):
-    try:
-        if isinstance(json_input, str):
-            input_data = json.loads(json_input)
-        elif isinstance(json_input, dict):
-            input_data = json_input
-        else:
-            raise ValueError("Input must be a JSON string or a dictionary.")
-    except json.JSONDecodeError as error:
-        raise ValueError(f"Invalid JSON input: {error.msg}")
+    if isinstance(json_input, str):
+        input_data = json.loads(json_input)
+    elif isinstance(json_input, dict):
+        input_data = json_input
+    else:
+        raise ValueError("Input must be a JSON string or a dictionary.")
 
     if not isinstance(input_data, dict):
         raise ValueError("Invalid JSON input: expected a JSON object.")
@@ -62,6 +59,7 @@ def predict(json_input):
     missing_fields = [
         feature for feature in feature_columns if feature not in input_data
     ]
+
     if missing_fields:
         raise ValueError("Missing input fields: " + ", ".join(missing_fields))
 
@@ -69,9 +67,11 @@ def predict(json_input):
         feature: input_data[feature]
         for feature in feature_columns
     }
+
     input_df = pd.DataFrame([ordered_input], columns=feature_columns)
 
     predictions = {}
+
     for target_name, model in models.items():
         predicted_value = model.predict(input_df)[0]
         predictions[target_name] = round(float(predicted_value), 2)
